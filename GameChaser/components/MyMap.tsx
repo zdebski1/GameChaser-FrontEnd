@@ -1,64 +1,80 @@
-// components/MyMap.tsx
-import React from 'react';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import React, { useEffect, useRef } from 'react';
+import {
+  GoogleMap,
+  useJsApiLoader,
+} from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
+const containerStyle = {
+  width: '100vw',
+  height: '100vh',
+};
 
-// Define the type for a stadium
+const center = {
+  lat: 37.7749,
+  lng: -122.4194, // Default center (San Francisco)
+};
+
 type Stadium = {
   stadiumId: number;
   stadiumName: string;
-  stadiumCity: string;
-  stadiumState: string;
   stadiumLatitude: number | null;
   stadiumLongitude: number | null;
-  stadiumAddress: string | null;
 };
 
 interface MyMapProps {
   stadiums: Stadium[];
 }
 
-const containerStyle = {
-  width: '200vh',  // Full width
-  height: '100vh',  // Full height of the viewport
-};
-
-const center = {
-  lat: 37.7749, // Default center (San Francisco)
-  lng: -122.4194,
-};
+const libraries: ('places' | 'geometry' | 'drawing' | 'visualization')[] = ['places'];
 
 const MyMap: React.FC<MyMapProps> = ({ stadiums }) => {
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-});
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+    version: 'weekly',
+  });
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded || !mapRef.current) return;
+
+    stadiums.forEach((stadium) => {
+      if (
+        stadium.stadiumLatitude !== null &&
+        stadium.stadiumLongitude !== null
+      ) {
+        const lat = stadium.stadiumLatitude;
+        const lng = stadium.stadiumLongitude;
+
+        // Debugging logs
+        console.log(`Adding marker for: ${stadium.stadiumName} at lat: ${lat}, lng: ${lng}`);
+        // Create the marker with a custom red icon
+        new google.maps.Marker({
+          position: { lat, lng },
+          map: mapRef.current,
+          title: stadium.stadiumName,
+          icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', // Red marker icon
+            scaledSize: new google.maps.Size(40, 40), // Adjust size of the marker if needed
+          },
+        });
+      }
+    });
+  }, [isLoaded, stadiums]);
 
   if (!isLoaded) return <div>Loading map...</div>;
 
   return (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={5}>
-      {stadiums.map((stadium) => {
-        // Check if latitude and longitude are not null
-        if (stadium.stadiumLatitude && stadium.stadiumLongitude) {
-          const position = {
-            lat: Number(stadium.stadiumLatitude),
-            lng: Number(stadium.stadiumLongitude),
-          };
-
-          return (
-            <Marker
-              key={stadium.stadiumId}
-              position={position}
-              label={stadium.stadiumName}
-            />
-          );
-        }
-        // If no valid latitude/longitude, log a warning
-        console.warn(`Invalid coordinates for stadium: ${stadium.stadiumName}`);
-        return null;
-      })}
-    </GoogleMap>
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={5}
+      onLoad={(map) => {
+        mapRef.current = map;
+      }}
+    />
   );
 };
 
