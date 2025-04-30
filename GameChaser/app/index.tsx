@@ -1,10 +1,11 @@
-import React from 'react';
-import { ReactDOM } from 'react-dom/client'; // <-- correct import
-import App from './app';
+import React from "react";
+import { registerRootComponent } from "expo";
+import MapScreen from "@/screens/MapScreen";
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Export your root component
+export default function App() {
+  return <MapScreen />;
+}
+
+// Register it for web and native
+registerRootComponent(App);
