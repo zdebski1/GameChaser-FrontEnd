@@ -3,6 +3,7 @@ import React from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
+
 // Define the type for a stadium
 type Stadium = {
   stadiumId: number;
