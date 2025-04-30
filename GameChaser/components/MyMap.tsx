@@ -1,8 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  GoogleMap,
-  useJsApiLoader,
-} from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
 const containerStyle = {
@@ -42,17 +39,14 @@ const MyMap: React.FC<MyMapProps> = ({ stadiums }) => {
     if (!isLoaded || !mapRef.current) return;
 
     stadiums.forEach((stadium) => {
-      if (
-        stadium.stadiumLatitude !== null &&
-        stadium.stadiumLongitude !== null
-      ) {
+      if (stadium.stadiumLatitude !== null && stadium.stadiumLongitude !== null) {
         const lat = stadium.stadiumLatitude;
         const lng = stadium.stadiumLongitude;
 
         // Debugging logs
         console.log(`Adding marker for: ${stadium.stadiumName} at lat: ${lat}, lng: ${lng}`);
 
-        // Create the marker
+        // Create the marker with a red circle icon
         const marker = new google.maps.Marker({
           position: { lat, lng },
           map: mapRef.current,
@@ -71,6 +65,8 @@ const MyMap: React.FC<MyMapProps> = ({ stadiums }) => {
         marker.addListener('click', () => {
           setSelectedStadium(stadium);
         });
+      } else {
+        console.warn(`Invalid coordinates for stadium: ${stadium.stadiumName}`);
       }
     });
   }, [isLoaded, stadiums]);
